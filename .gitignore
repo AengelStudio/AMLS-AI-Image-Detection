@@ -220,3 +220,11 @@ __marimo__/
 .streamlit/secrets.toml
 
 data/
+
+# Pipeline outputs (keep directory placeholders only)
+solution/artifacts/*
+!solution/artifacts/.gitkeep
+!solution/artifacts/task02/
+!solution/artifacts/task02/.gitkeep
+!solution/artifacts/task03/
+!solution/artifacts/task03/.gitkeep
