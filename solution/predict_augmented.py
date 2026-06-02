@@ -1,38 +1,60 @@
-"""Task 1.3: inference with augmented model (stub)."""
+"""Task 1.3 — inference with the robust (augmented) model.
+
+Loads the Task 3 checkpoint + calibrated threshold and writes
+artifacts/task03/predictions.csv (row_id,predicted_label) for the predict split.
+"""
 
 import argparse
-from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "data"
-PREDICTIONS_PATH = ROOT / "artifacts" / "task03" / "predictions.csv"
+from amls_common import (
+    DATA_DIR,
+    IMG_SIZE,
+    TASK03_DIR,
+    _to_bytes,
+    decode_square,
+    seed_everything,
+    setup_threads,
+    split_files,
+)
+from amls_model import load_checkpoint, predict_scores
+
+CKPT = TASK03_DIR / "model.pt"
+PREDICTIONS_PATH = TASK03_DIR / "predictions.csv"
+
+
+def load_predict():
+    files = split_files("predict")
+    if not files:
+        raise FileNotFoundError(f"No parquet files in {DATA_DIR / 'predict'}")
+    row_ids, imgs = [], []
+    for f in files:
+        df = pd.read_parquet(f, columns=["row_id", "image"])
+        row_ids.extend(int(r) for r in df["row_id"])
+        imgs.extend(decode_square(_to_bytes(v), IMG_SIZE) for v in df["image"])
+    return np.asarray(row_ids, dtype=np.int64), np.stack(imgs).astype(np.uint8)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Predict labels for Task 3.")
     parser.add_argument("--timeout_seconds", type=int, required=True)
     parser.parse_args()
+    seed_everything()
+    setup_threads()
 
-    predict_dir = DATA_DIR / "predict"
-    if not predict_dir.is_dir():
-        raise FileNotFoundError(f"Expected predict split at {predict_dir}")
+    model, mean, std, thr, meta = load_checkpoint(CKPT)
+    row_ids, x = load_predict()
+    scores = predict_scores(model, x, mean, std)
+    pred = (scores >= thr).astype(int)
 
-    frames = []
-    for path in sorted(predict_dir.glob("*.parquet")):
-        frames.append(pd.read_parquet(path, columns=["row_id"]))
-    if not frames:
-        raise FileNotFoundError(f"No parquet files in {predict_dir}")
-
-    rows = pd.concat(frames, ignore_index=True).sort_values("row_id", ignore_index=True)
-    rows["predicted_label"] = 0
-
+    out = pd.DataFrame({"row_id": row_ids, "predicted_label": pred})
+    out = out.sort_values("row_id", ignore_index=True).astype({"row_id": int, "predicted_label": int})
     PREDICTIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    rows[["row_id", "predicted_label"]].astype({"predicted_label": int}).to_csv(
-        PREDICTIONS_PATH, index=False
-    )
-    print(f"predict_augmented.py: wrote {len(rows)} rows to {PREDICTIONS_PATH}")
+    out.to_csv(PREDICTIONS_PATH, index=False)
+    print(f"predict_augmented.py: wrote {len(out)} rows to {PREDICTIONS_PATH} "
+          f"(threshold={thr:.3f}, predicted ai={int(pred.sum())}/{len(pred)})")
 
 
 if __name__ == "__main__":

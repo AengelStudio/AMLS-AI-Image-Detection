@@ -1,0 +1,47 @@
+{
+  "best_epoch": 7,
+  "threshold": 0.7185891270637512,
+  "fpr_limit": 0.2,
+  "calibration_target": 0.14,
+  "train_seconds": 1321.8,
+  "validation": {
+    "threshold": 0.7185891270637512,
+    "fpr_real": 0.18085106382978725,
+    "recall_ai": 0.7564102564102564,
+    "accuracy": 0.7669039145907474,
+    "n": 1124,
+    "n_real": 188,
+    "n_ai": 936,
+    "split": "validation"
+  },
+  "validation_augmented": {
+    "threshold": 0.7185891270637512,
+    "fpr_real": 0.10695187165775401,
+    "recall_ai": 0.6179295624332978,
+    "accuracy": 0.6637010676156584,
+    "n": 1124,
+    "n_real": 187,
+    "n_ai": 937,
+    "split": "validation_augmented"
+  },
+  "calibration": {
+    "threshold": 0.7185891270637512,
+    "fpr_real": 0.14285714285714285,
+    "recall_ai": 0.7559300873907615,
+    "accuracy": 0.7728690228690228,
+    "n": 1924,
+    "n_real": 322,
+    "n_ai": 1602,
+    "split": "calibration"
+  },
+  "calibration_augmented": {
+    "threshold": 0.7185891270637512,
+    "fpr_real": 0.13707165109034267,
+    "recall_ai": 0.6157205240174672,
+    "accuracy": 0.656964656964657,
+    "n": 1924,
+    "n_real": 321,
+    "n_ai": 1603,
+    "split": "calibration_augmented"
+  }
+}

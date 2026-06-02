@@ -1,0 +1,35 @@
+{
+  "best_epoch": 9,
+  "threshold": 0.5760243535041809,
+  "fpr_limit": 0.2,
+  "validation": {
+    "threshold": 0.5760243535041809,
+    "fpr_real": 0.17553191489361702,
+    "recall_ai": 0.8023504273504274,
+    "accuracy": 0.806049822064057,
+    "n": 1124,
+    "n_real": 188,
+    "n_ai": 936,
+    "split": "validation"
+  },
+  "validation_augmented": {
+    "threshold": 0.5760243535041809,
+    "fpr_real": 0.22459893048128343,
+    "recall_ai": 0.663820704375667,
+    "accuracy": 0.6823843416370107,
+    "n": 1124,
+    "n_real": 187,
+    "n_ai": 937,
+    "split": "validation_augmented"
+  },
+  "calibration": {
+    "threshold": 0.5760243535041809,
+    "fpr_real": 0.14906832298136646,
+    "recall_ai": 0.8220973782771536,
+    "accuracy": 0.8269230769230769,
+    "n": 1924,
+    "n_real": 322,
+    "n_ai": 1602,
+    "split": "calibration"
+  }
+}

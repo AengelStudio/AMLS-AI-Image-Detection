@@ -228,3 +228,20 @@ solution/artifacts/*
 !solution/artifacts/task02/.gitkeep
 !solution/artifacts/task03/
 !solution/artifacts/task03/.gitkeep
+
+# --- AMLS project: local dev artefacts (not part of submission) ---
+.venv/
+solution/data
+solution/artifacts/prepared/
+solution/artifacts/clean/
+solution/artifacts/task02/model.pt
+solution/artifacts/task03/model.pt
+solution/artifacts/task02/metrics.json
+solution/artifacts/task03/metrics.json
+analysis/out/
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
