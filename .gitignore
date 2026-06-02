@@ -43,6 +43,8 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.DS_Store
+.gitignore
 nosetests.xml
 coverage.xml
 *.cover
