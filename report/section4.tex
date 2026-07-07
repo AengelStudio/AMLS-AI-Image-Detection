@@ -1,0 +1,24 @@
+\section{Task 1.3 — Data Augmentation and Robustness (30\,pts)}
+\textbf{Motivation.} The classical model's FPR jumps to $\BaseAugFpr$ on
+\texttt{validation\_augmented} (constraint violated) and the clean CNN also
+degrades, because the high-frequency forensic cue is erased by compression,
+blur and rescaling. We therefore make the detector robust by \emph{continuing
+training from the Task~2 checkpoint} with on-the-fly augmentation.
+
+\textbf{Strategy.} Each batch is randomly perturbed with the transformations the
+exercise highlights plus light photometric noise: downscale-then-upscale
+(resolution loss), JPEG recompression (quality $30$–$95$), Gaussian blur,
+brightness/contrast jitter, additive noise and horizontal flips. This forces the
+network onto content/structure cues that survive perturbation rather than fragile
+spectral fingerprints. Epochs are selected on a \emph{combined} clean+augmented
+validation set (so we do not pick the least-robust early epoch), and the
+threshold is recalibrated on the combined clean+augmented calibration real
+images at a slightly conservative target ($0.14$) so the FPR constraint holds
+under perturbation as well as on clean data despite the noisy small-sample FPR.
+
+\textbf{Results.} Table~\ref{tab:t2} (last row) shows the augmented model lifts
+recall on \texttt{validation\_augmented} from $\CnnAugRecall$ (clean CNN) to
+$\AugAugRecall$ at FPR~$\AugAugFpr$, clearing the $0.6$ target, while keeping
+competitive clean-validation performance (recall~$\AugValRecall$ at
+FPR~$\AugValFpr$). Robustness improves substantially at a small clean-accuracy
+cost — the expected trade-off.
