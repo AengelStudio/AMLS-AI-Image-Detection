@@ -1,24 +1,27 @@
-\section{Task 1.3 — Data Augmentation and Robustness (30\,pts)}
-\textbf{Motivation.} The classical model's FPR jumps to $\BaseAugFpr$ on
-\texttt{validation\_augmented} (constraint violated) and the clean CNN also
-degrades, because the high-frequency forensic cue is erased by compression,
-blur and rescaling. We therefore make the detector robust by \emph{continuing
-training from the Task~2 checkpoint} with on-the-fly augmentation.
+\section{Data Augmentation and Feature Engineering}
+The task was to improve the detector's robustness against real-world settings,
+to still meet the $0.2$ FPR limit.
+We decided to continue from the Task~2 checkpoint and tested the model under
+altered conditions. This resulted in an FPR of $0.262$, well above the allowed
+threshold.
 
-\textbf{Strategy.} Each batch is randomly perturbed with the transformations the
-exercise highlights plus light photometric noise: downscale-then-upscale
-(resolution loss), JPEG recompression (quality $30$–$95$), Gaussian blur,
-brightness/contrast jitter, additive noise and horizontal flips. This forces the
-network onto content/structure cues that survive perturbation rather than fragile
-spectral fingerprints. Epochs are selected on a \emph{combined} clean+augmented
-validation set (so we do not pick the least-robust early epoch), and the
-threshold is recalibrated on the combined clean+augmented calibration real
-images at a slightly conservative target ($0.14$) so the FPR constraint holds
-under perturbation as well as on clean data despite the noisy small-sample FPR.
+\textbf{Approach}\\
+To fix this, we took the transformations mentioned in the task
+(scaling, compression, blur) and added a few more common
+ones we felt were missing (brightness/contrast jitter, additive noise,
+horizontal flips), applying them randomly to each batch during training.
+We picked the best checkpoint based on a combined clean+augmented validation
+set, so we wouldn't accidentally pick an early epoch that already performs badly
+on clean data. We also recalibrated the threshold on combined clean+augmented
+calibration data, using a slightly more conservative target
+($\tau = 0.14$ instead of $0.15$) to leave extra margin given the noisy FPR
+estimate from few real samples.
 
-\textbf{Results.} Table~\ref{tab:t2} (last row) shows the augmented model lifts
+\textbf{Results}\\
+Table~\ref{tab:t2} (last row) shows the augmented model lowers
 recall on \texttt{validation\_augmented} from $\CnnAugRecall$ (clean CNN) to
-$\AugAugRecall$ at FPR~$\AugAugFpr$, clearing the $0.6$ target, while keeping
-competitive clean-validation performance (recall~$\AugValRecall$ at
-FPR~$\AugValFpr$). Robustness improves substantially at a small clean-accuracy
-cost — the expected trade-off.
+$\AugAugRecall$ at FPR~$\AugAugFpr$, so we are still clearing the $0.6$ target 
+and now meet the FPR limit of $0.2$.
+The validation performance for the untransformed data is also  
+affected, with a recall of 0.756 (previous 0.802) at FPR 0.181 but still
+meets all requirements.

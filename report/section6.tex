@@ -1,10 +1,8 @@
-\section{Reproducibility and Conclusion}
-The solution is fully containerised (CPU-only \texttt{torch}, no runtime
-downloads), deterministic (fixed seeds, capped threads) and respects the
-read-only data mount by writing all artefacts under \texttt{artifacts/}. We
-identified and neutralised an aspect-ratio shortcut, met the Task~2 target
-(recall~$\CnnValRecall$ at FPR~$\CnnValFpr\le0.20$), and improved robustness to
-recall~$\AugAugRecall$ on augmented data within the same CPU budget. The main
-remaining risks are the small number of real calibration/validation images
-(noisy FPR estimates, mitigated by the calibration margin) and the residual
-centring/smoothness biases surfaced by the explainability analysis.
+\newpage
+\section{Conclusion}
+We found and fixed an aspect-ratio shortcut, hit the Task~2 target
+on augmented data, all within the same CPU budget.
+The main risks that are left: the calibration/validation splits only have a
+small number of real images, so the FPR estimate is a bit noisy (we tried to
+account for this with the calibration margin), and the model still has the
+center/smoothness biases we found in the explainability section.

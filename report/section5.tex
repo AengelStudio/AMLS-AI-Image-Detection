@@ -1,34 +1,45 @@
-\section{Task 1.4 — Explainability (20\,pts)}
-We analyse the trained CNN with three complementary methods on validation images
-(Fig.~\ref{fig:explain}): vanilla-gradient saliency, Grad-CAM on the last
-convolutional block, and occlusion sensitivity (sliding a neutral patch and
-measuring the drop in P(AI)). We examine the most borderline true-positive (AI),
-true-negative (real), false-positive and false-negative cases.
+\section{Explainability}
 
-\textbf{Findings.} Saliency is noisy and spatially \emph{distributed} rather than
-tied to one object, and Grad-CAM frequently highlights broad background/sky
-regions instead of the main subject — consistent with a detector that keys on
-global texture statistics rather than semantics. The occlusion analysis is the
-most revealing: replacing a patch with neutral grey almost always \emph{raises}
-P(AI) (negative $\Delta$P(AI) in Fig.~\ref{fig:explain}), i.e.\ the model reads
-flat, low-detail regions as AI-like. Averaged over many images
-(Fig.~\ref{fig:occ}) this effect is strongest in the image centre (mean
-$\Delta$P(AI) centre vs.\ border $\OccCenterReal$ vs.\ $\OccBorderReal$ for real,
-$\OccCenterAi$ vs.\ $\OccBorderAi$ for AI), exposing two biases worth flagging: a
-\emph{smoothness confound} (AI images are smoother, so the model equates
-smoothness with ``fake'') and a mild \emph{centre bias}. These also explain the
-errors: \emph{false positives} are smooth, low-detail real photos, and
-\emph{false negatives} are unusually detailed AI images. We therefore treat the
-explanations critically — the model relies on a genuine but shortcut-prone cue
-(local detail/smoothness) rather than a single robust artefact, which is exactly
-why the Task~1.3 augmentation (which perturbs detail and compression) is needed.
+We looked at the trained CNN with three methods on validation images
+(Fig.~\ref{fig:explanation}): vanilla-gradient saliency, Grad-CAM on the last
+convolutional block, and occlusion sensitivity (we slide a neutral grey patch
+over the image and check how much $P(\mathrm{AI})$ changes). We picked the most
+borderline cases for each category: true-positive (AI), true-negative (real),
+false-positive, and false-negative.
+
+
+\textbf{What we found}\\
+Saliency turned out pretty noisy and spread out over the whole image instead of
+pointing at one object. Grad-CAM often highlighted background or sky instead of
+the actual subject, which fits with a model that's picking up on general
+texture statistics rather than what's actually in the picture. We trust the 
+occlusion result more than saliency or Grad-CAM here, since it directly measures 
+the effect on the output rather than relying on gradients. The occlusion
+analysis was the most useful of the three: when we covered up a patch with grey,
+$P(\mathrm{AI})$ almost always went up, meaning the model treats flat,
+low-detail regions as ``AI-like''. Averaged over many images
+(Fig.~\ref{fig:occlusion}), this effect is strongest in the center of the image.
+
+Interestingly, the occlusion effect is noticeably stronger on real images than 
+on AI ones. This suggests the model's decision 
+for real images depends more heavily on local high-detail regions, whereas for AI 
+images the 'fake' signal is spread more evenly across the whole image, consistent 
+with AI images being globally smoother.
+
+This highlights two things the model is doing wrong: it confuses smoothness with
+``fake'' (because AI images tend to be smoother), and it has a slight bias
+toward the center of the image. It also explains our errors: false positives are
+smooth, low-detail real photos, and false negatives are unusually detailed AI
+images. So overall, we shouldn't fully trust these explanations. The model is
+relying on a real but shortcut-prone signal (local detail/smoothness), not
+something robust.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.86\linewidth]{explain_examples.png}
   \caption{Per-case explanations (rows: borderline TP-AI, TN-real, FP, FN).
   Columns: input, saliency, Grad-CAM, occlusion $\Delta$P(AI).}
-  \label{fig:explain}
+  \label{fig:explanation}
 \end{figure}
 \begin{figure}[t]
   \centering
@@ -38,7 +49,7 @@ why the Task~1.3 augmentation (which perturbs detail and compression) is needed.
   \end{subfigure}\hfill
   \begin{subfigure}{0.52\linewidth}
     \includegraphics[width=\linewidth]{explain_occlusion_avg.png}
-    \caption{Mean occlusion importance (real vs.\ AI).}\label{fig:occ}
+    \caption{Mean occlusion importance (real vs.\ AI).}\label{fig:occlusion}
   \end{subfigure}
   \caption{What the models rely on: high-frequency spectral bins (a) and a mild
   centre bias in spatial attention (b).}
