@@ -1,8 +1,8 @@
 \section{Data Augmentation and Feature Engineering}
-The task was to improve the detector's robustness against real-world settings,
-to still meet the $0.2$ FPR limit.
+The task was to improve the detector's robustness to real-world perturbations
+while still meeting the $0.2$ FPR limit.
 We decided to continue from the Task~2 checkpoint and tested the model under
-altered conditions. This resulted in an FPR of $0.262$, well above the allowed
+altered conditions. This resulted in an FPR of $\CnnAugFpr$, above the allowed
 threshold.
 
 \textbf{Approach}\\
@@ -18,10 +18,10 @@ calibration data, using a slightly more conservative target
 estimate from few real samples.
 
 \textbf{Results}\\
-Table~\ref{tab:t2} (last row) shows the augmented model lowers
-recall on \texttt{validation\_augmented} from $\CnnAugRecall$ (clean CNN) to
-$\AugAugRecall$ at FPR~$\AugAugFpr$, so we are still clearing the $0.6$ target 
-and now meet the FPR limit of $0.2$.
-The validation performance for the untransformed data is also  
-affected, with a recall of 0.756 (previous 0.802) at FPR 0.181 but still
+Table~\ref{tab:t2} (last row) shows the augmented model repairs the FPR
+violation on \texttt{validation\_augmented} ($\CnnAugFpr \to \AugAugFpr$) at the
+cost of some recall ($\CnnAugRecall \to \AugAugRecall$), so we now meet the FPR
+limit of $0.2$ while still clearing the $0.6$ recall target.
+Performance on the untransformed validation data is also affected --- recall
+$\AugValRecall$ (previously $\CnnValRecall$) at FPR~$\AugValFpr$ --- but still
 meets all requirements.

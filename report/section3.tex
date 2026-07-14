@@ -1,14 +1,16 @@
-\section{Task 1.2 — Modelling and Tuning under Time Constraints (35\,pts)}
-\textbf{Protocol.} We maximise recall on AI images subject to a false-positive
+\section{Modelling and Tuning under Time Constraints}
+\textbf{Protocol}\\
+ We maximise recall on AI images subject to a false-positive
 rate (FPR) on real images of at most $20\%$. The operating threshold is
 \emph{calibrated automatically} on \texttt{calibration/}. We set it to the
 $(1-\tau)$ quantile of the P(AI) scores of real calibration images with a target
 $\tau=\Targetfpr$. This leaves a safe margin below the $0.20$ limit for the hidden holdout. The threshold is never hand-set, and \texttt{validation/} is held out purely to
 verify the realised FPR.
 
-\textbf{Two model families.} (1) \emph{Classical baseline}: We engineered forensic
-features, which are a 32-bin radial FFT spectrum, colour/saturation statistics and
-high-pass residual statistics. These features were fed to a histogram gradient-boosted tree. It
+\textbf{Two model families}\\
+ (1) \emph{Classical baseline}: We engineered forensic
+features (a 32-bin radial FFT spectrum, colour/saturation statistics and
+high-pass residual statistics) and fed them to a histogram gradient-boosted tree. It
 trains in seconds and, as Table~\ref{tab:t2} shows, reaches
 recall~$\BaseValRecall$ at FPR~$\BaseValFpr$ on validation. Its most important
 features (permutation importance) are the highest-frequency spectral bins and
@@ -22,21 +24,23 @@ high-pass residual (RGB minus a $3{\times}3$ blur) as extra channels, giving the
 detector an explicit forensic cue motivated by the Task~1.1 spectral analysis
 while keeping the external input plain RGB.
 
-\textbf{Efficient, reproducible training.} The Appendix~C reference takes
+\textbf{Efficient, reproducible training}\\
+ The Appendix~C reference takes
 $\RefSeconds$\,s for 35 steps on our machine and our \texttt{train.py} runs in
 $\TrainSeconds$\,s ($\TrainRatio\times$ reference, within the $5\times$
 guideline) and well under the 1800\,s timeout. Because CPU speed varies, we adjusted the
-training loop to \emph{measure} its own step time and sizes a one-cycle LR
+training loop to \emph{measure} its own step time and size a one-cycle LR
 schedule to the number of epochs that fit the budget, so the learning rate
 anneals fully regardless of hardware; the best checkpoint (by validation recall
 subject to the FPR margin) is flushed whenever it improves, so an early timeout
 still yields a usable model. We use class-weighted cross-entropy (real weighted
 $\sim\!3\times$) so the minority real class is not ignored.
 
-\textbf{Results and ablations.} Table~\ref{tab:t2} compares both families. The
+\textbf{Results and ablations}\\
+ Table~\ref{tab:t2} compares both families. The
 CNN reaches recall~$\CnnValRecall$ at FPR~$\CnnValFpr$ on validation, meeting
-the $0.8$ recall target while keeping the FPR safely below the $0.20$ limit, and shows a strong improvement over the classical baseline (recall~\BaseValRecall{}). We made a few key choices that mattered. The first one was squaring the inputs byremoving the
-aspect-ratio shortcut. Without it validation FPR collapses. The second one was BatchNorm (fast
+the $0.8$ recall target while keeping the FPR safely below the $0.20$ limit, and shows a strong improvement over the classical baseline (recall~\BaseValRecall{}). We made a few key choices that mattered. The first one was squaring the inputs, removing the
+aspect-ratio shortcut; without it, the validation FPR explodes. The second one was BatchNorm (fast
 from-scratch convergence in the few affordable epochs). The third one was the stride-2 stem, which lets
 us keep $\ImgSize$px inputs within budget. The fourth choice was calibrating on a held-out split
 (the realised validation FPR tracks the target).
@@ -58,7 +62,7 @@ CNN — Task 3 (augmented)   & \AugValFpr  & \AugValRecall  & \AugAugFpr  & \Aug
 keep FPR safely below the $0.20$ limit; Task~2 target $0.15$, Task~3 a more
 conservative $0.14$ for the augmented distribution). The constraint holds on
 \emph{validation} for every row; the clean models violate it on
-\texttt{validation\_augmented} ($0.262$/$0.225$), which is exactly what the
-augmented model repairs ($0.107$).}
+\texttt{validation\_augmented} ($\BaseAugFpr$/$\CnnAugFpr$), which is exactly
+what the augmented model repairs ($\AugAugFpr$).}
 \label{tab:t2}
 \end{table}

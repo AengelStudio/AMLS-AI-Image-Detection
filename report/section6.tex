@@ -1,8 +1,8 @@
-\newpage
 \section{Conclusion}
-We found and fixed an aspect-ratio shortcut, hit the Task~2 target
-on augmented data, all within the same CPU budget.
+We found and fixed an aspect-ratio shortcut and met the recall and FPR targets
+on both clean (Task~2) and augmented (Task~3) data, all within the same CPU
+budget.
 The main risks that are left: the calibration/validation splits only have a
 small number of real images, so the FPR estimate is a bit noisy (we tried to
 account for this with the calibration margin), and the model still has the
-center/smoothness biases we found in the explainability section.
+centre/smoothness biases we found in the explainability section.

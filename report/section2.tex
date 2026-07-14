@@ -1,36 +1,35 @@
-\section{Task 1.1 — Dataset Exploration and Cleaning}
-\textbf{Class Distribution.} We balanced the training set across the six source
-classes ( with about 4948 cases for each ). This represents about a $1{:}5$ real
-to AI ratio after merging ( Fig.~\ref{fig:aspect} left ). We will keep this ratio
-and address it when we get to the modelling through class-weighted loss and
-calibrated threshold. We prefer this instead of re-sampling, because the
-evaluation splits have the same imbalance.
+\section{Dataset Exploration and Cleaning}
+\textbf{Class Distribution} \\
+We balanced the training set across the six source
+classes (about 4948 images each). This represents about a $1{:}5$ real-to-AI
+ratio after merging (Fig.~\ref{fig:aspect} left). We keep this ratio and address
+it during modelling through a class-weighted loss and a calibrated threshold. We
+prefer this over re-sampling, because the evaluation splits have the same
+imbalance.
 
-\textbf{The important characteristic is aspect ratio.} When we inspect image
-sizes, it reveals a close to perfect shortcut in train, real (COCO) images are
-nearly always non-square, e.g.\ $640{\times}480$ or $640{\times}427$ however
-nearly all AI images are square ($320{\times}320$ or $270{\times}270$).
-Basically, amongst all the kept real images $\RealNonSquare$ are non-square
-where only $\RealSquare$ are square, while all $\AiSquare$ AI images are in fact
-square (Fig.~\ref{fig:aspect} right). However, in the calibration, the validation
-and the predict splits, we can see they are uniformly $320{\times}320$. We can
-infer that aspect ratio is an artifact linked only to training, making a model
-that relies only on that metric would label all square validation images as AI
-( possibly a 100\% false-positive rate on real images ). We remove this shortcut,
-by changing every training image resolution to a square, and this is the most
-important cleaning decision for this training case, we match the test
-distribution.
-
-\textbf{There are other tells,} firstly, all splits are in fact JPEG/RGB, that
-means file format carries no important signal, since the dataset authors already
-appear to have normalized it. Secondly, the averaged FFT power spectrum
-( Fig.~\ref{fig:spectrum} ) indicates that real images usually carry consistently
-higher frequency energy than AI images. This is a real forensic cue that happens
-to also be present on validation, so it transfers. Third, we can notice that AI
-images are slightly brighter and less saturated. And fourth, the augmented splits
-have smaller encoded sizes ( Fig.~\ref{fig:bytes}), indicating the augmentation
-pipeline applies stronger JPEG compression. As has been shown in Task~1.3, this
-mostly destroys the high-freq. cue and motivates augmentation based robustness.
+\textbf{The important characteristic is aspect ratio} \\
+Inspecting image sizes
+reveals a close-to-perfect shortcut in train: real (COCO) images are nearly
+always non-square (e.g.\ $640{\times}480$ or $640{\times}427$), whereas nearly
+all AI images are square ($320{\times}320$ or $270{\times}270$). Amongst the
+kept real images, $\RealNonSquare$ are non-square and only $\RealSquare$ are
+square, while all $\AiSquare$ AI images are in fact square
+(Fig.~\ref{fig:aspect} right). In contrast, the calibration, validation and
+predict splits are uniformly $320{\times}320$. Aspect ratio is therefore an
+artifact of the training split alone: a model that relies only on this metric
+would label every square validation image as AI (possibly a 100\% false-positive
+rate on real images). We remove this shortcut by resizing every training image
+to a square, matching the test distribution --- the most important cleaning
+decision for this dataset.\\
+\textbf{Other observations}\\
+The averaged FFT power spectrum
+(Fig.~\ref{fig:spectrum}) indicates that real images consistently carry more
+high-frequency energy than AI images. This is a genuine forensic cue that is
+also present on validation, so it transfers. Secondly, AI images are slightly
+brighter and less saturated. Finally, the augmented splits have smaller encoded
+sizes (Fig.~\ref{fig:bytes}), indicating the augmentation pipeline applies
+stronger JPEG compression. As shown in Task~1.3, this mostly destroys the
+high-frequency cue and motivates augmentation-based robustness.
 
 \begin{table}[h]
 \centering\small
@@ -45,27 +44,28 @@ mean brightness (RGB) & 0.43 & 0.47\\
 mean saturation & 0.29 & 0.28\\
 \bottomrule
 \end{tabular}
-\caption{These class related descriptive statistics show us that resolution and
-encoded size are strongly correlated with the label in train, but are in fact
-neutralized by the square resizing approach. Colour differences are weak and
-Counts are after de-duplication.}
+\caption{Per-class descriptive statistics of the training split (counts after
+de-duplication). Resolution and encoded size are strongly correlated with the
+label in train, but are neutralised by the square resizing; colour differences
+are weak.}
 \label{tab:desc}
 \end{table}
 
-\textbf{Deterministic cleaning pipeline ( \texttt{clean.py} ).} We decoded all
-training images and dropped undecodable streams ($\Nbad$ found), we also dropped
-exact duplicates via an MD5 of the encoded bytes while keeping the first
-occurrence ($\Ndup$ removed), and we recorded per-image metadata. The obtained
-result is a deterministic cleaned index of $\Nkept$ rows. Squaring to the model
-resolution, justified above, is applied in \texttt{prepare.py}. We intentionally
-avoid any non-deterministic cleaning, or cleaning that alters the content, such
-as denoising, that could erase the forensic cues the detector should use.
+\textbf{Deterministic cleaning pipeline (\texttt{clean.py})}\\
+ We decoded all
+training images and dropped undecodable streams ($\Nbad$ found), dropped exact
+duplicates via an MD5 hash of the encoded bytes while keeping the first
+occurrence ($\Ndup$ removed), and recorded per-image metadata. The result is a
+deterministic cleaned index of $\Nkept$ rows. Squaring to the model resolution,
+justified above, is applied in \texttt{prepare.py}. We intentionally avoid any
+non-deterministic cleaning, or cleaning that alters image content (such as
+denoising), which could erase the forensic cues the detector should use.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.84\linewidth]{fig_class_aspect.png}
   \caption{Left: balanced source-class counts in train. Right: in train, real
-  images are non-square and AI images are square this is a shortcut absent from the
+  images are non-square and AI images are square --- a shortcut absent from the
   $320^2$ evaluation splits.}
   \label{fig:aspect}
 \end{figure}
@@ -82,7 +82,7 @@ as denoising, that could erase the forensic cues the detector should use.
     \caption{Encoded size by split.}
     \label{fig:bytes}
   \end{subfigure}
-  \caption{Forensic cues. Real images keep more high-frequency energy in the
-  radial power spectrum on validation, augmentation compresses images more
-  heavily, as shown by encoded size by split.}
+  \caption{Forensic cues. (a)~Real images keep more high-frequency energy in the
+  radial power spectrum on validation; (b)~augmentation compresses images more
+  heavily, as shown by the encoded size per split.}
 \end{figure}

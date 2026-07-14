@@ -18,23 +18,22 @@ the effect on the output rather than relying on gradients. The occlusion
 analysis was the most useful of the three: when we covered up a patch with grey,
 $P(\mathrm{AI})$ almost always went up, meaning the model treats flat,
 low-detail regions as ``AI-like''. Averaged over many images
-(Fig.~\ref{fig:occlusion}), this effect is strongest in the center of the image.
+(Fig.~\ref{fig:occlusion}), this effect is strongest in the centre of the image.
 
 Interestingly, the occlusion effect is noticeably stronger on real images than 
 on AI ones. This suggests the model's decision 
-for real images depends more heavily on local high-detail regions, whereas for AI 
-images the 'fake' signal is spread more evenly across the whole image, consistent 
+for real images depends more heavily on local high-detail regions, whereas for AI
+images the ``fake'' signal is spread more evenly across the whole image, consistent
 with AI images being globally smoother.
 
 This highlights two things the model is doing wrong: it confuses smoothness with
 ``fake'' (because AI images tend to be smoother), and it has a slight bias
-toward the center of the image. It also explains our errors: false positives are
+toward the centre of the image. It also explains our errors: false positives are
 smooth, low-detail real photos, and false negatives are unusually detailed AI
-images. So overall, we shouldn't fully trust these explanations. The model is
-relying on a real but shortcut-prone signal (local detail/smoothness), not
-something robust.
+images. So overall, we should not blindly trust the model: it is relying on a
+real but shortcut-prone signal (local detail/smoothness), not something robust.
 
-\begin{figure}[t]
+\begin{figure}[p]
   \centering
   \includegraphics[width=0.86\linewidth]{explain_examples.png}
   \caption{Per-case explanations (rows: borderline TP-AI, TN-real, FP, FN).
